@@ -37,7 +37,7 @@ const server = http.createServer((req,res)=>{
         res.setHeader('Location','/');
         res.end();
     }
-    else if(req.url == '/about'){
+    else if(req.url == '/about1'){
         path += 'about.html'
         res.statusCode = 200
     }else{
