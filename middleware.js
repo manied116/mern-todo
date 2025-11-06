@@ -1,6 +1,6 @@
 const express = require('express')
 const app = express()
-
+//browse-> request->server(middleware) -> response -> browser
 const requestTime = function (req, res, next) {
   req.requestTime = Date.now()
   next()
