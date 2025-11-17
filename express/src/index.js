@@ -15,12 +15,12 @@ const users = [
 ];
 
 const products = [
-    {id:1,p_name:"productA",p_price:25},   
-    {id:2,p_name:"productB",p_price:35},   
-    {id:3,p_name:"productC",p_price:55},   
-    {id:4,p_name:"productD",p_price:15},   
-    {id:5,p_name:"productE",p_price:65},   
-    {id:6,p_name:"productF",p_price:50},   
+    {id:1,p_name:"productA",p_price:25},
+    {id:2,p_name:"productB",p_price:35},
+    {id:3,p_name:"productC",p_price:55},
+    {id:4,p_name:"productD",p_price:15},
+    {id:5,p_name:"productE",p_price:65},
+    {id:6,p_name:"productF",p_price:50},
 ]
 
 // route params handle
@@ -62,7 +62,6 @@ app.get("/api/products/:id",(req,res)=>{
 
 app.get("/api/products",(req,res)=>{
     const {query:{filter,value}} = req;
-    console.log(filter,value);
     if(filter && value){
         return res.send(products.filter((product)=> product[filter].includes(value)));
     }
@@ -70,10 +69,73 @@ app.get("/api/products",(req,res)=>{
 })
 
 // middleware
-app.use(express.json())
+app.use(express.json())  //get json format data
+
+// MIDDLEWARE
+const getById = (req,res,next) =>{
+    const id = parseInt(req.params.id);
+    if(isNaN(id)){
+        res.status(400).send({msg:"Invalid Id"})
+    }
+    const productIndex = products.findIndex((product)=> product.id === id);
+    if(productIndex === -1){
+        return res.status(400).send({msg:"Product Not found"})
+    }
+    req.productIndex = productIndex
+    next()
+}
 // Post REQUEST
-app.post("api/products",(req,res)=>{
-    return res.send(req.body)
+app.post("/api/products",(req,res)=>{
+    const {body} = req;
+    const new_product = {id:products[products.length-1].id+1,...body}
+    products.push(new_product);
+    return res.status(201).send(products)
+})
+
+// PUT REQUEST - COMPLETE UPDATE
+app.put("/api/products/:id",getById,(req,res)=>{
+    // const id = parseInt(req.params.id);
+    // if(isNaN(id)){
+    //     res.status(400).send({msg:"Invalid Id"})
+    // }
+    // const productIndex = products.findIndex((product)=> product.id === id);
+    // if(productIndex === -1){
+    //     return res.status(400).send({msg:"Product Not found"})
+    // }
+    const {body,productIndex} = req;
+    products[productIndex] = {id:id,...body}
+    return res.status(200).send({msg:"Product updated successfully.!"})
+})
+
+// PATCH REQUEST - SINGLE NODE UPDATE
+app.patch("/api/products/:id",getById,(req,res)=>{
+    // const id = parseInt(req.params.id);
+    // if(isNaN(id)){
+    //     res.status(400).send({msg:"Invalid Id"})
+    // }
+    // const productIndex = products.findIndex((product)=> product.id === id);
+    // if(productIndex === -1){
+    //     return res.status(400).send({msg:"Product Not found"})
+    // }
+    const {body,productIndex} = req;
+    products[productIndex] = {...products[productIndex],...body}
+    return res.status(200).send({msg:"New node updated successfully.!"})
+})
+
+// DELETE -PARTICULAR ITEMS
+app.delete("/api/products/:id",getById,(req,res)=>{
+    // const id = parseInt(req.params.id);
+    // if(isNaN(id)){
+    //     res.status(400).send({msg:"Invalid Id"})
+    // }
+    // const productIndex = products.findIndex((product)=> product.id === id);
+    // if(productIndex === -1){
+    //     return res.status(400).send({msg:"Product Not found"})
+    // }
+    const {productIndex} = req
+    products.splice(productIndex,1)
+
+    return res.status(200).send({msg:"Deleted successfully.!"})
 })
 app.listen(port,()=>{
     console.log("App running:",port)
