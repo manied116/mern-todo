@@ -1,5 +1,7 @@
 const express = require('express')
 const app = express()
+const { createProductValidationSchema } =  require('./utils/validationSchema')
+const {checkSchema,matchedData,validationResult} = require('express-validator')
 const port = 3000
 
 app.get("/",(req,res) => {
@@ -85,58 +87,79 @@ const getById = (req,res,next) =>{
     next()
 }
 // Post REQUEST
-app.post("/api/products",(req,res)=>{
-    const {body} = req;
-    const new_product = {id:products[products.length-1].id+1,...body}
-    products.push(new_product);
-    return res.status(201).send(products)
-})
+// app.post("/api/products",(req,res)=>{
+//     const {body} = req;
+//     const new_product = {id:products[products.length-1].id+1,...body}
+//     products.push(new_product);
+//     return res.status(201).send(products)
+// })
 
 // PUT REQUEST - COMPLETE UPDATE
-app.put("/api/products/:id",getById,(req,res)=>{
-    // const id = parseInt(req.params.id);
-    // if(isNaN(id)){
-    //     res.status(400).send({msg:"Invalid Id"})
-    // }
-    // const productIndex = products.findIndex((product)=> product.id === id);
-    // if(productIndex === -1){
-    //     return res.status(400).send({msg:"Product Not found"})
-    // }
-    const {body,productIndex} = req;
-    products[productIndex] = {id:id,...body}
-    return res.status(200).send({msg:"Product updated successfully.!"})
-})
+// app.put("/api/products/:id",getById,(req,res)=>{
+//     // const id = parseInt(req.params.id);
+//     // if(isNaN(id)){
+//     //     res.status(400).send({msg:"Invalid Id"})
+//     // }
+//     // const productIndex = products.findIndex((product)=> product.id === id);
+//     // if(productIndex === -1){
+//     //     return res.status(400).send({msg:"Product Not found"})
+//     // }
+//     const {body,productIndex} = req;
+//     products[productIndex] = {id:id,...body}
+//     return res.status(200).send({msg:"Product updated successfully.!"})
+// })
 
 // PATCH REQUEST - SINGLE NODE UPDATE
-app.patch("/api/products/:id",getById,(req,res)=>{
-    // const id = parseInt(req.params.id);
-    // if(isNaN(id)){
-    //     res.status(400).send({msg:"Invalid Id"})
-    // }
-    // const productIndex = products.findIndex((product)=> product.id === id);
-    // if(productIndex === -1){
-    //     return res.status(400).send({msg:"Product Not found"})
-    // }
-    const {body,productIndex} = req;
-    products[productIndex] = {...products[productIndex],...body}
-    return res.status(200).send({msg:"New node updated successfully.!"})
-})
+// app.patch("/api/products/:id",getById,(req,res)=>{
+//     // const id = parseInt(req.params.id);
+//     // if(isNaN(id)){
+//     //     res.status(400).send({msg:"Invalid Id"})
+//     // }
+//     // const productIndex = products.findIndex((product)=> product.id === id);
+//     // if(productIndex === -1){
+//     //     return res.status(400).send({msg:"Product Not found"})
+//     // }
+//     const {body,productIndex} = req;
+//     products[productIndex] = {...products[productIndex],...body}
+//     return res.status(200).send({msg:"New node updated successfully.!"})
+// })
 
 // DELETE -PARTICULAR ITEMS
-app.delete("/api/products/:id",getById,(req,res)=>{
-    // const id = parseInt(req.params.id);
-    // if(isNaN(id)){
-    //     res.status(400).send({msg:"Invalid Id"})
-    // }
-    // const productIndex = products.findIndex((product)=> product.id === id);
-    // if(productIndex === -1){
-    //     return res.status(400).send({msg:"Product Not found"})
-    // }
-    const {productIndex} = req
-    products.splice(productIndex,1)
+// app.delete("/api/products/:id",getById,(req,res)=>{
+//     // const id = parseInt(req.params.id);
+//     // if(isNaN(id)){
+//     //     res.status(400).send({msg:"Invalid Id"})
+//     // }
+//     // const productIndex = products.findIndex((product)=> product.id === id);
+//     // if(productIndex === -1){
+//     //     return res.status(400).send({msg:"Product Not found"})
+//     // }
+//     const {productIndex} = req
+//     products.splice(productIndex,1)
 
-    return res.status(200).send({msg:"Deleted successfully.!"})
-})
+//     return res.status(200).send({msg:"Deleted successfully.!"})
+// })
+
+// VALIDATION
+app.post("/api/products", checkSchema(createProductValidationSchema), (req, res) => {
+  const result = validationResult(req);
+
+  if (!result.isEmpty()) {
+    return res.status(400).send({ error: result.array() });
+  }
+
+  const body = matchedData(req);  // FIXED
+  console.log(body);
+
+  const new_product = {
+    id: products[products.length - 1].id + 1,
+    ...body,
+  };
+
+  products.push(new_product);
+
+  return res.status(201).send(new_product);
+});
 app.listen(port,()=>{
     console.log("App running:",port)
 })
