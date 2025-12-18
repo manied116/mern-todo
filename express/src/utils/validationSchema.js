@@ -1,4 +1,4 @@
-export const createProductValidationSchema = {
+const createProductValidationSchema = {
   p_name: {
     notEmpty: {
       errorMessage: "Product name must not be empty",
@@ -19,3 +19,35 @@ export const createProductValidationSchema = {
     },
   },
 };
+
+const createUserValidationSchema = {
+  name: {
+    notEmpty: {
+      errorMessage: "Name must not be empty",
+    },
+    isLength: {
+      options: { min: 3, max: 30 },
+      errorMessage: "Name length requirements not met",
+    },
+  },
+  email: {
+    notEmpty: {
+      errorMessage: "Email must not be empty",
+    },
+    isEmail: {
+      errorMessage: "Must be a valid email",
+    },
+  },
+  age: {
+    optional: true,
+    isInt: {
+      options: { min: 1, max: 120 },
+      errorMessage: "Age must be a valid integer between 1 and 120",
+    },
+  },
+};
+
+module.exports = {
+  createProductValidationSchema,
+  createUserValidationSchema,
+}
